@@ -6,6 +6,11 @@ src/
 # Pro features — local only, never pushed to public repo
 pro/
 
+# CWS submission artifacts (local only)
+snapfull-*.zip
+store_screenshot_*.png
+zi*
+
 # OS
 .DS_Store
 Thumbs.db
