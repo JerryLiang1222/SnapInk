@@ -615,6 +615,38 @@ function sendMsg(payload) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Pro feature gate
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  Usage (Phase 2):
+//    const mod = await loadProFeature('crop');
+//    if (!mod) return;  // free user or file missing → already handled
+//    mod.init(lightboxImg, onCropDone);
+//
+//  How it works:
+//    1. Check isPro() via background message.
+//    2. If free → show upgrade toast, return null.
+//    3. If pro  → dynamic-import pro/<feature>.js (only exists in local build).
+//       The file is .gitignored and never pushed to the public repo.
+//       Free users never reach step 3, so a missing file is not an error.
+//
+async function loadProFeature(featureName) {
+  const res = await sendMsg({ type: 'IS_PRO' }).catch(() => ({ isPro: false }));
+  if (!res.isPro) {
+    showToast('✦ Pro feature — upgrade to unlock');
+    return null;
+  }
+  try {
+    const url = chrome.runtime.getURL(`pro/${featureName}.js`);
+    return await import(url);
+  } catch (e) {
+    console.error(`[SnapFull] Pro module "${featureName}" not found:`, e.message);
+    showToast('Pro module not available in this build');
+    return null;
+  }
+}
+
 let _toastTimer = null;
 function showToast(text) {
   toastEl.textContent = text;

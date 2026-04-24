@@ -15,6 +15,11 @@
 let session      = null;
 let captureResult = null;
 
+// ── Config ────────────────────────────────────────────────────────────────────
+// TODO: replace with your LemonSqueezy checkout URL after creating a product
+const LS_CHECKOUT_URL       = 'https://snapfull.lemonsqueezy.com/buy/YOUR_PRODUCT_ID';
+const LS_REVALIDATE_INTERVAL = 24 * 60 * 60 * 1000; // re-validate every 24 h
+
 // ── IndexedDB ─────────────────────────────────────────────────────────────────
 const DB_NAME    = 'snapfull_history';
 const DB_VERSION = 1;
@@ -130,6 +135,122 @@ async function getCaptureCount() {
   });
 }
 
+// ── License / Pro ─────────────────────────────────────────────────────────────
+//
+//  Storage keys:
+//    snapfull_instance_id  — stable UUID for this Chrome profile (device ID)
+//    snapfull_license      — { key, instanceId, status, email, validatedAt }
+//
+//  Flow:
+//    1. User clicks "Activate" in popup → ACTIVATE_LICENSE message
+//    2. background calls LemonSqueezy /licenses/activate
+//    3. On success, stores license record in chrome.storage.sync
+//    4. Every 24 h, quietly re-validates in background (_revalidateBackground)
+//    5. isPro() is the single gate used before any Pro feature
+//
+
+async function _getOrCreateInstanceId() {
+  const data = await chrome.storage.sync.get('snapfull_instance_id');
+  if (data.snapfull_instance_id) return data.snapfull_instance_id;
+  const id = crypto.randomUUID();
+  await chrome.storage.sync.set({ snapfull_instance_id: id });
+  return id;
+}
+
+async function getLicenseStatus() {
+  const { snapfull_license: lic } = await chrome.storage.sync.get('snapfull_license');
+  if (!lic || lic.status !== 'active') {
+    return { isPro: false, checkoutUrl: LS_CHECKOUT_URL };
+  }
+  return { isPro: true, email: lic.email ?? '', checkoutUrl: LS_CHECKOUT_URL };
+}
+
+async function isPro() {
+  const { snapfull_license: lic } = await chrome.storage.sync.get('snapfull_license');
+  if (!lic || lic.status !== 'active') return false;
+  // Re-validate in background if stale; return cached true in the meantime
+  if (Date.now() - (lic.validatedAt ?? 0) > LS_REVALIDATE_INTERVAL) {
+    _revalidateBackground(lic.key, lic.instanceId);
+  }
+  return true;
+}
+
+async function postLicenseApi(action, params) {
+  const resp = await fetch(`https://api.lemonsqueezy.com/v1/licenses/${action}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+    },
+    body: new URLSearchParams(params).toString(),
+  });
+  return resp.json();
+}
+
+async function _revalidateBackground(key, instanceId) {
+  try {
+    const data = await postLicenseApi('validate', {
+      license_key: key,
+      instance_id: instanceId,
+    });
+    const { snapfull_license: cur } = await chrome.storage.sync.get('snapfull_license');
+    if (!cur || cur.key !== key) return; // license changed meanwhile
+    if (data.valid) {
+      await chrome.storage.sync.set({
+        snapfull_license: { ...cur, validatedAt: Date.now() },
+      });
+    } else {
+      // Key was refunded or revoked — remove quietly
+      await chrome.storage.sync.remove('snapfull_license');
+    }
+  } catch (_) { /* offline — keep cached status */ }
+}
+
+async function activateLicense(rawKey) {
+  const key = (rawKey ?? '').trim();
+  if (!key) return { ok: false, error: 'Please enter a license key.' };
+
+  const instanceId = await _getOrCreateInstanceId();
+  try {
+    const data = await postLicenseApi('activate', {
+      license_key:   key,
+      instance_name: `SnapFull-${instanceId.slice(0, 8)}`,
+    });
+
+    if (data.activated) {
+      const record = {
+        key,
+        instanceId:  data.instance?.id ?? instanceId,
+        status:      'active',
+        email:       data.license_key?.customer_email
+                  ?? data.meta?.customer_email
+                  ?? '',
+        validatedAt: Date.now(),
+      };
+      await chrome.storage.sync.set({ snapfull_license: record });
+      return { ok: true, email: record.email };
+    }
+
+    // LemonSqueezy returns an `error` string on failure
+    return { ok: false, error: data.error ?? 'Invalid or already-used license key.' };
+  } catch (e) {
+    return { ok: false, error: 'Network error — please check your connection.' };
+  }
+}
+
+async function deactivateLicense() {
+  const { snapfull_license: lic } = await chrome.storage.sync.get('snapfull_license');
+  if (!lic) return { ok: true };
+  try {
+    await postLicenseApi('deactivate', {
+      license_key: lic.key,
+      instance_id: lic.instanceId,
+    });
+  } catch (_) { /* ignore — remove locally regardless */ }
+  await chrome.storage.sync.remove('snapfull_license');
+  return { ok: true };
+}
+
 // ── Message router ────────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   switch (msg.type) {
@@ -193,6 +314,31 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         .then(count => sendResponse({ ok: true, count }))
         .catch(e => sendResponse({ ok: false, error: e.message }));
       return true;
+
+    // ── License API ───────────────────────────────────────────────────────────
+    case 'GET_LICENSE_STATUS':
+      getLicenseStatus()
+        .then(status => sendResponse(status))
+        .catch(() => sendResponse({ isPro: false, checkoutUrl: LS_CHECKOUT_URL }));
+      return true;
+
+    case 'ACTIVATE_LICENSE':
+      activateLicense(msg.key)
+        .then(result => sendResponse(result))
+        .catch(e => sendResponse({ ok: false, error: e.message }));
+      return true;
+
+    case 'DEACTIVATE_LICENSE':
+      deactivateLicense()
+        .then(result => sendResponse(result))
+        .catch(e => sendResponse({ ok: false, error: e.message }));
+      return true;
+
+    case 'IS_PRO':
+      isPro()
+        .then(pro => sendResponse({ isPro: pro }))
+        .catch(() => sendResponse({ isPro: false }));
+      return true;
   }
 });
 
@@ -200,11 +346,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 chrome.commands.onCommand.addListener(async command => {
   if (command !== 'capture-page') return;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab?.id) startCapture(tab.id).catch(console.error);
+  if (tab?.id) startCapture(tab.id, null).catch(console.error);
+});
+
+// ── Progress port (popup → background long-lived connection) ──────────────────
+chrome.runtime.onConnect.addListener(port => {
+  if (port.name !== 'capture-progress') return;
+
+  port.onMessage.addListener(async msg => {
+    if (msg.type !== 'START_CAPTURE') return;
+    try {
+      await startCapture(msg.tabId, port);
+    } catch (e) {
+      safeSend(port, { type: 'ERROR', error: e.message });
+      try { port.disconnect(); } catch (_) {}
+    }
+  });
 });
 
 // ── startCapture ──────────────────────────────────────────────────────────────
-async function startCapture(tabId) {
+async function startCapture(tabId, progressPort = null) {
   if (!tabId) throw new Error('No active tab');
 
   const tab = await chrome.tabs.get(tabId);
@@ -220,8 +381,11 @@ async function startCapture(tabId) {
     sourceTabUrl:    url,
     windowId:        tab.windowId,
     outerFrameDrawn: false,
+    progressPort,
   };
   captureResult = null;
+
+  safeSend(progressPort, { type: 'PROGRESS', pct: 8, text: 'Preparing page…' });
 
   try {
     await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
@@ -275,6 +439,7 @@ async function handleCaptureRequest(data, sendResponse) {
   if (data.isFixedOverlay) {
     if (session?.canvas) session.ctx.drawImage(bitmap, 0, 0);
     bitmap.close();
+    safeSend(session?.progressPort, { type: 'PROGRESS', pct: 88, text: 'Finalising…' });
     sendResponse({ ok: true });
     return;
   }
@@ -317,6 +482,18 @@ async function handleCaptureRequest(data, sendResponse) {
   }
 
   bitmap.close();
+
+  // Push real-time progress: y goes from totalHeight→0 (bottom-to-top scroll)
+  const fraction = data.totalHeight > 0
+    ? Math.min(1, (data.totalHeight - data.y) / data.totalHeight)
+    : 0;
+  const pct = Math.round(10 + fraction * 75); // maps 10% → 85%
+  safeSend(session?.progressPort, {
+    type: 'PROGRESS',
+    pct,
+    text: 'Scrolling & capturing…',
+  });
+
   sendResponse({ ok: true });
 }
 
@@ -327,8 +504,15 @@ async function finishCapture() {
     return;
   }
 
+  const port = session.progressPort ?? null;
+
   try {
+    safeSend(port, { type: 'PROGRESS', pct: 90, text: 'Stitching image…' });
+
     const blob    = await session.canvas.convertToBlob({ type: 'image/png' });
+
+    safeSend(port, { type: 'PROGRESS', pct: 96, text: 'Almost done…' });
+
     const dataUrl = await blobToDataUrl(blob);
 
     captureResult = {
@@ -342,6 +526,9 @@ async function finishCapture() {
     // Open preview tab immediately
     chrome.tabs.create({ url: chrome.runtime.getURL('preview.html') });
 
+    safeSend(port, { type: 'DONE' });
+    try { port?.disconnect(); } catch (_) {}
+
     // Persist to history asynchronously — don't let DB errors block preview
     saveToHistory(captureResult).catch(e =>
       console.warn('[SnapFull] saveToHistory failed:', e.message)
@@ -349,12 +536,18 @@ async function finishCapture() {
 
   } catch (err) {
     console.error('[SnapFull] finishCapture error:', err);
+    safeSend(port, { type: 'ERROR', error: err.message });
+    try { port?.disconnect(); } catch (_) {}
   } finally {
     session = null;
   }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+function safeSend(port, msg) {
+  try { port?.postMessage(msg); } catch (_) {}
+}
+
 function sendToContent(tabId, msg) {
   return new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(tabId, msg, response => {

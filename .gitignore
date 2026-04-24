@@ -3,6 +3,9 @@ jspdf-4.2.1.tgz
 package/
 src/
 
+# Pro features — local only, never pushed to public repo
+pro/
+
 # OS
 .DS_Store
 Thumbs.db

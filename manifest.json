@@ -40,10 +40,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "web_accessible_resources": [
-    {
-      "resources": ["gallery.html", "gallery.css", "gallery.js", "libs/jspdf.umd.min.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "homepage_url": "https://github.com/JerryLiang1222/SnapFull",
+  "minimum_chrome_version": "116"
 }

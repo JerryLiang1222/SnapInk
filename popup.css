@@ -157,6 +157,210 @@ body {
 }
 .history-badge[hidden] { display: none; }
 
+/* ── Divider ────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: #1c1c26;
+  margin: 0 -16px;
+}
+
+/* ── Pro / License section ──────────────────────────────── */
+.ps { display: flex; flex-direction: column; gap: 8px; }
+.ps[hidden] { display: none; }
+
+/* State A — free */
+.ps-info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ps-lock-icon {
+  width: 13px; height: 13px;
+  color: #555;
+  flex-shrink: 0;
+}
+.ps-features-hint {
+  font-size: 11px;
+  color: #555;
+}
+.ps-btns {
+  display: flex;
+  gap: 6px;
+}
+.btn-get-pro {
+  flex: 1;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c6aff 0%, #5a8fff 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-get-pro:hover { opacity: 0.85; }
+
+.btn-enter-key {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #252532;
+  border-radius: 8px;
+  background: transparent;
+  color: #777;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-enter-key:hover { border-color: #3a3a4e; color: #bbb; }
+
+/* State B — key input */
+.ps-label {
+  font-size: 11px;
+  color: #666;
+}
+.license-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #252532;
+  border-radius: 8px;
+  background: #111118;
+  color: #e0e0ee;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  letter-spacing: 0.03em;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.license-input:focus { border-color: #7c6aff; }
+.license-input::placeholder { color: #383848; }
+
+.ps-error {
+  font-size: 11px;
+  color: #ff6b6b;
+  line-height: 1.4;
+}
+.btn-key-cancel {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #252532;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.btn-key-cancel:hover { color: #aaa; }
+.btn-key-confirm {
+  flex: 1;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c6aff 0%, #5a8fff 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-key-confirm:hover  { opacity: 0.85; }
+.btn-key-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* State C — activating */
+.ps-activating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+  padding: 2px 0;
+}
+.ps-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid #2a2a38;
+  border-top-color: #7c6aff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* State D — pro active */
+.ps-active-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ps-pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 5px;
+  border-radius: 99px;
+  background: rgba(34, 197, 94, 0.13);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: #22c55e;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.ps-pro-badge svg { width: 11px; height: 11px; }
+.ps-email {
+  font-size: 11px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.btn-remove-key {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #2a1a1a;
+  border-radius: 8px;
+  background: transparent;
+  color: #664444;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-remove-key:hover {
+  border-color: #ff4444;
+  color: #ff6b6b;
+  background: rgba(255, 68, 68, 0.07);
+}
+
+/* Remove-license two-step confirm */
+.ps-remove-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.ps-remove-confirm-text {
+  flex: 1;
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+}
+.btn-remove-key-confirm {
+  padding: 5px 10px;
+  border: 1px solid #2a1a1a;
+  border-radius: 8px;
+  background: transparent;
+  color: #664444;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.btn-remove-key-confirm:hover {
+  border-color: #ff4444;
+  color: #ff6b6b;
+  background: rgba(255, 68, 68, 0.07);
+}
+
 /* Shortcut hint */
 .hint {
   display: flex;

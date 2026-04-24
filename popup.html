@@ -47,6 +47,70 @@
       <span class="history-badge" id="historyBadge" hidden>0</span>
     </button>
 
+    <!-- Pro / License section -->
+    <div class="divider" hidden></div>
+
+    <div class="pro-section" id="proSection" hidden>
+
+      <!-- State A: free -->
+      <div id="psDefault" class="ps">
+        <div class="ps-info-row">
+          <svg class="ps-lock-icon" viewBox="0 0 24 24" fill="none">
+            <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span class="ps-features-hint">Crop · Annotate · Batch capture</span>
+        </div>
+        <div class="ps-btns">
+          <button class="btn-get-pro" id="btnGetPro">⬆ Get Pro</button>
+          <button class="btn-enter-key" id="btnEnterKey">Enter Key</button>
+        </div>
+      </div>
+
+      <!-- State B: key input -->
+      <div id="psInput" class="ps" hidden>
+        <label class="ps-label" for="licenseInput">License Key</label>
+        <input id="licenseInput" class="license-input" type="text"
+               placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+               autocomplete="off" spellcheck="false" />
+        <div id="psError" class="ps-error" hidden></div>
+        <div class="ps-btns">
+          <button class="btn-key-cancel" id="btnKeyCancel">Cancel</button>
+          <button class="btn-key-confirm" id="btnKeyConfirm">Activate →</button>
+        </div>
+      </div>
+
+      <!-- State C: activating -->
+      <div id="psActivating" class="ps" hidden>
+        <div class="ps-activating-row">
+          <div class="ps-spinner"></div>
+          <span>Activating…</span>
+        </div>
+      </div>
+
+      <!-- State D: pro active -->
+      <div id="psActive" class="ps" hidden>
+        <div class="ps-active-row">
+          <div class="ps-pro-badge">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Pro
+          </div>
+          <div class="ps-email" id="proEmail"></div>
+        </div>
+        <div class="ps-remove-row" id="psRemoveRow">
+          <button class="btn-remove-key" id="btnRemoveKey">Remove License</button>
+        </div>
+        <div class="ps-remove-confirm-row" id="psRemoveConfirmRow" hidden>
+          <span class="ps-remove-confirm-text">Remove this device?</span>
+          <button class="btn-key-cancel" id="btnRemoveCancel">Cancel</button>
+          <button class="btn-remove-key-confirm" id="btnRemoveConfirm">Remove</button>
+        </div>
+      </div>
+
+    </div>
+
     <!-- Shortcut hint -->
     <div class="hint" id="shortcutHint">
       <span>Shortcut:</span>
