@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapFull Preview</title>
+  <link rel="stylesheet" href="preview.css" />
+</head>
+<body>
+  <!-- Toolbar -->
+  <header class="toolbar">
+    <div class="toolbar-left">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="18" height="18" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3 8h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="6.5" cy="5.5" r="1" fill="currentColor"/>
+        <circle cx="9.5" cy="5.5" r="1" fill="currentColor"/>
+        <path d="M8 13l2.5 2.5L16 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand">SnapFull</span>
+      <span class="divider">|</span>
+      <span class="page-url" id="pageUrl">—</span>
+    </div>
+
+    <div class="toolbar-right">
+      <span class="img-size" id="imgSize"></span>
+
+      <button class="btn btn-secondary" id="btnOpenGallery" title="View all screenshots">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        History
+      </button>
+
+      <button class="btn btn-secondary" id="btnCopyClip" title="Copy image to clipboard">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8"/></svg>
+        Copy
+      </button>
+
+      <button class="btn btn-secondary" id="btnDownloadPng" title="Download as PNG">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        PNG
+      </button>
+
+      <button class="btn btn-primary" id="btnDownloadPdf" title="Download as PDF">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Loading state -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Loading screenshot…</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-state" id="errorState" hidden>
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <h2>Capture not found</h2>
+    <p>Please trigger a new capture from the extension icon or press <kbd>Alt+Shift+P</kbd>.</p>
+  </div>
+
+  <!-- Preview area -->
+  <main class="preview-area" id="previewArea" hidden>
+    <img id="previewImg" alt="Full page screenshot" draggable="false" />
+    <!-- Floating zoom toggle pill: click to switch fit ↔ original size -->
+    <div class="zoom-float" id="zoomFloat">
+      <button class="zoom-label" id="zoomLabel" title="点击切换：适合窗口 ↔ 原始大小 / Click: fit ↔ 100%">fit</button>
+    </div>
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- jsPDF (loaded after page ready) -->
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>

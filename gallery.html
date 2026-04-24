@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapFull – History</title>
+  <link rel="stylesheet" href="gallery.css" />
+</head>
+<body>
+
+  <!-- Toolbar -->
+  <header class="toolbar">
+    <div class="toolbar-left">
+      <svg class="logo" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="18" height="18" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3 8h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="6.5" cy="5.5" r="1" fill="currentColor"/>
+        <circle cx="9.5" cy="5.5" r="1" fill="currentColor"/>
+        <path d="M8 13l2.5 2.5L16 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand">SnapFull</span>
+      <span class="divider">|</span>
+      <span class="page-title">History</span>
+      <span class="count-badge" id="countBadge" hidden>0</span>
+    </div>
+    <div class="toolbar-right">
+      <!-- Group toggle -->
+      <button class="btn btn-toggle" id="btnGroup" title="Group by site" hidden>
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="8" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+          <rect x="3" y="11" width="8" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+          <rect x="3" y="19" width="8" height="2" rx="1" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M15 5.5h6M15 13.5h6M15 20h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        Group
+      </button>
+      <!-- Select toggle -->
+      <button class="btn btn-toggle" id="btnSelect" title="Select multiple" hidden>
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M5.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+          <rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+          <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+        Select
+      </button>
+      <!-- Clear all -->
+      <button class="btn btn-danger" id="btnClearAll" hidden>
+        <svg viewBox="0 0 24 24" fill="none">
+          <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M9 6V4h6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Clear All
+      </button>
+    </div>
+  </header>
+
+  <!-- Batch action bar (visible in select mode) -->
+  <div class="batch-bar" id="batchBar" hidden>
+    <button class="batch-btn-text" id="btnSelectAll">Select All</button>
+    <span class="batch-count" id="batchCount">0 selected</span>
+    <div class="batch-actions">
+      <button class="btn btn-danger" id="btnBatchDelete" disabled>
+        <svg viewBox="0 0 24 24" fill="none">
+          <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Delete
+      </button>
+      <button class="btn btn-secondary" id="btnExitSelect">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="state-view" id="stateLoading">
+    <div class="spinner"></div>
+    <p>Loading history…</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="state-view" id="stateEmpty" hidden>
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect x="8" y="8" width="48" height="48" rx="6" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M8 20h48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="16" cy="14" r="2.5" fill="currentColor"/>
+      <circle cx="23" cy="14" r="2.5" fill="currentColor"/>
+      <path d="M22 38l6 6 14-14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2>No screenshots yet</h2>
+    <p>Capture a full page to start building your history.</p>
+  </div>
+
+  <!-- Grid -->
+  <main class="grid-container" id="gridContainer" hidden>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" hidden>
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-panel">
+
+      <!-- Lightbox toolbar -->
+      <div class="lightbox-toolbar">
+        <div class="lightbox-meta">
+          <span class="lightbox-url" id="lightboxUrl"></span>
+          <span class="lightbox-sep">·</span>
+          <span class="lightbox-date" id="lightboxDate"></span>
+          <span class="lightbox-sep">·</span>
+          <span class="lightbox-size" id="lightboxSize"></span>
+        </div>
+        <div class="lightbox-controls">
+          <button class="btn btn-secondary" id="lbBtnPng">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            PNG
+          </button>
+          <button class="btn btn-primary" id="lbBtnPdf">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            PDF
+          </button>
+          <button class="btn btn-close-lb" id="lbBtnClose" title="Close (Esc)">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <!-- Image stage -->
+      <div class="lightbox-stage" id="lbStage">
+        <img id="lightboxImg" alt="Full page screenshot" draggable="false" />
+        <!-- Floating zoom pill -->
+        <div class="zoom-float" id="zoomFloat">
+          <button class="zoom-btn" id="btnZoomOut" title="Zoom out (−)">−</button>
+          <button class="zoom-label" id="zoomLabel" title="Click: fit ↔ 100%">100%</button>
+          <button class="zoom-btn" id="btnZoomIn" title="Zoom in (+)">+</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script src="gallery.js"></script>
+</body>
+</html>

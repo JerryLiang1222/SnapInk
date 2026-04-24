@@ -1,0 +1,180 @@
+/* SnapFull Popup Styles */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 260px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  background: #0f0f13;
+  color: #e8e8f0;
+  user-select: none;
+}
+
+.container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  width: 22px;
+  height: 22px;
+  color: #7c6aff;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #9d8fff 0%, #6a9fff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Capture Button */
+.btn-capture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c6aff 0%, #5a8fff 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.01em;
+}
+
+.btn-capture svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-capture:hover { opacity: 0.88; }
+.btn-capture:active { transform: scale(0.97); }
+.btn-capture:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Status */
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status[hidden] { display: none; }
+
+.progress-bar {
+  height: 3px;
+  border-radius: 99px;
+  background: #2a2a38;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7c6aff, #5a8fff);
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: pulse-progress 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-progress {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.status-text {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+}
+
+/* History button */
+.btn-history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 16px;
+  border: 1px solid #252532;
+  border-radius: 10px;
+  background: #16161f;
+  color: #999;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-history svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.btn-history:hover {
+  background: #1e1e2c;
+  border-color: #3a3a4e;
+  color: #ccc;
+}
+
+.history-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  border-radius: 99px;
+  background: #252532;
+  color: #888;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+.history-badge[hidden] { display: none; }
+
+/* Shortcut hint */
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #555;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #1c1c26;
+  color: #888;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.6;
+}

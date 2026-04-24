@@ -1,0 +1,14 @@
+# npm / build artifacts (safe to delete locally)
+jspdf-4.2.1.tgz
+package/
+src/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
